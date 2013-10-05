@@ -1,8 +1,50 @@
+/*
+ * some utilities.
+ */
+function createTable(width, height) {
+    var table = new Array(height);
+    for (var j = 0; j < height; j++) {
+	table[j] = new Array(width);
+    }
+    return table;
+}
+
+
+function Coordinate(x, y) {
+    this.x = x || 0;
+    this.y = y || 0;
+}
+
+
+function Region(id, color) {
+    this.id = id;
+    this.color = color;
+    this.coords = [];
+}
+
+Region.prototype.addCoord = function(coord, idTable) {
+    this.coords.push(coord);
+    idTable[coord.y][coord.x] = this.id;
+};
+
+Region.prototype.mergeRegion = function(region, idTable) {
+    var transferCoords = region.coords;
+    var coord;
+    for (var i = 0; i < transferCoords.length; i++) {
+	coord = transferCoords[i];
+	idTable[coord.y][coord.x] = this.id;
+	this.coords.push(coord);
+    }
+};
+
+
+/*
+ * color coherence vector.
+ */
 function CCV(options) {
     this.img = document.getElementById(options.element);
     this.canvas = this.prepareCanvas(this.img, options.size);
-    var reducedImage = this.reduceColor(this.canvas);
-    this.calc(reducedImage, options.threshold);
+    this.threshold = options.threshold;
 }
 
 CCV.prototype.prepareCanvas = function(element, size) {
@@ -15,18 +57,16 @@ CCV.prototype.prepareCanvas = function(element, size) {
     return canvas;
 }
 
-function createTable(width, height) {
-    var table = new Array(height);
-    for (var j = 0; j < height; j++) {
-	table[j] = new Array(width);
-    }
-    return table;
+CCV.prototype.calc = function () {
+    this.reducedImage = this.reduceColor();
+    var regions = this.calcRegions();
+    return this.calcCCV(regions, this.threshold);
 }
 
-CCV.prototype.reduceColor = function(canvas) {
-    var width = canvas.width;
-    var height = canvas.height;
-    var context = canvas.getContext('2d');
+CCV.prototype.reduceColor = function() {
+    var width = this.canvas.width;
+    var height = this.canvas.height;
+    var context = this.canvas.getContext('2d');
     var imageData = context.getImageData(0, 0, width, height);
     var pixels = imageData.data;
 
@@ -43,33 +83,11 @@ CCV.prototype.reduceColor = function(canvas) {
     return table;
 }
 
-function Coordinate(x, y) {
-    this.x = x || 0;
-    this.y = y || 0;
-}
-
-function Region(id, color) {
-    this.id = id;
-    this.color = color;
-    this.coords = [];
-}
-Region.prototype.addCoord = function(coord, idTable) {
-    this.coords.push(coord);
-    idTable[coord.y][coord.x] = this.id;
-};
-Region.prototype.mergeRegion = function(region, idTable) {
-    var transferCoords = region.coords;
-    var coord;
-    for (var i = 0; i < transferCoords.length; i++) {
-	coord = transferCoords[i];
-	idTable[coord.y][coord.x] = this.id;
-	this.coords.push(coord);
-    }
-};
-
-CCV.prototype.calc = function(reducedImage, threshold) {
+CCV.prototype.calcRegions = function() {
     var width = this.canvas.width;
     var height = this.canvas.height;
+    var reducedImage = this.reducedImage;
+    var threshold = this.threshold;
 
     var idTable = createTable(width, height);
     var regions = {};
@@ -127,22 +145,11 @@ CCV.prototype.calc = function(reducedImage, threshold) {
 	    }
 	}
     }
+    this.idTable = idTable;
+    return regions;
+}
 
-    // calculate color coherence vector!
-    // (for preview debug)
-    var context = this.canvas.getContext('2d');
-    var imageData = context.getImageData(0, 0, width, height);
-    var pixels = imageData.data;
-    var value;
-    for (i = 0; i < pixels.length; i+=4) {
-	value = idTable[Math.floor(i / 4 / width)][(i / 4) % width];
-	pixels[i] = (value* 29 + 73) % 256;
-	pixels[i+1] = (value * 61 + 101) % 256;
-	pixels[i+2] = (value * 31 + 237) % 256;
-    }
-    context.putImageData(imageData, 0, 0);
-
-    // calculate!
+CCV.prototype.calcCCV = function(regions, threshold) {
     var ccv = new Array(128);
     for (i = 0; i < 128; i++) {
 	ccv[i] = 0;
@@ -155,9 +162,22 @@ CCV.prototype.calc = function(reducedImage, threshold) {
 	    ccv[region.color * 2 + 1] += 1;
 	}
     }
+    return ccv;
+}
 
-    var resultDisplay = document.getElementById('result');
-    var result = 'ccv = [' + ccv.join(', ') + ']';
-    var node = document.createTextNode(result);
-    resultDisplay.appendChild(node);
+CCV.prototype.debugPreview = function() {
+    var context = this.canvas.getContext('2d');
+    var width = this.canvas.width;
+    var height = this.canvas.height;
+    var imageData = context.getImageData(0, 0, width, height);
+    var pixels = imageData.data;
+    var idTable = this.idTable;
+    var value;
+    for (i = 0; i < pixels.length; i+=4) {
+	value = idTable[Math.floor(i / 4 / width)][(i / 4) % width];
+	pixels[i] = (value* 29 + 73) % 256;
+	pixels[i+1] = (value * 61 + 101) % 256;
+	pixels[i+2] = (value * 31 + 237) % 256;
+    }
+    context.putImageData(imageData, 0, 0);
 }

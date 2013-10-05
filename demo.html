@@ -13,15 +13,34 @@
 	  var ccv = new CCV({
 	    element: "image",
 	    threshold: 25,
-	    size: 240,
+	    size: 240
 	  });
+
+	  var vector = ccv.calc();
+	  var resultDisplay = document.getElementById('result');
+	  var result = 'ccv = [' + vector.join(', ') + ']';
+	  var node = document.createTextNode(result);
+	  resultDisplay.appendChild(node);
+
+	  // preview regions
+	  ccv.debugPreview();
 	};
       }
     </script>
   </head>
   <body onload="demo();">
-    <h1>Color Coherence Vector Demo</h1>
+    <h1>ccv.js demo</h1>
+    <div id="description">
+      <p>
+	Calculate color coherence vector for similar image search.<br />
+	Ported from <a href="https://bitbucket.org/aihara/pyccv">pyccv</a>
+	by <a href="http://argmax.jp">Shunsuke Aihara</a>.<br />
+      </p>
+      <p>
+	Please see <a href="https://github.com/buhii/ccv.js">github</a> repository.
+      </p>
+    </div>
     <div><code id="result"></code></div>
-    <img style="margin-top: 1em;" id="image" alt="" src="" />
+    <img style="margin-top: 1em;" id="image" />
   </body>
 </html>
