@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Color Coherence Vector Demo</title>
+    <script src="ccv.js"></script>
+    <script>
+      function demo() {
+        var image = document.getElementById('image');
+	image.crossOrigin = "anonymous";
+	image.src = 'http://i.imgur.com/7AM5JEn.jpg';
+	image.onload = function() {
+	  var ccv = new CCV({
+	    element: "image",
+	    threshold: 25,
+	    size: 240,
+	  });
+	};
+      }
+    </script>
+  </head>
+  <body onload="demo();">
+    <h1>Color Coherence Vector Demo</h1>
+    <div><code id="result"></code></div>
+    <img style="margin-top: 1em;" id="image" alt="" src="" />
+  </body>
+</html>
