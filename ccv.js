@@ -106,7 +106,8 @@ CCV.prototype.calcRegions = function() {
     }
 
     var i, j;
-    var color, a, b;
+    var color;
+    var idA, idB;
     var regA, regB;
     var coord;
 
@@ -114,28 +115,28 @@ CCV.prototype.calcRegions = function() {
 	for (j = 0; j < height; j++) {
 	    coord = new Coordinate(i, j);
 	    color = reducedImage[j][i];
-	    a = isSameColor(i, j - 1, color) ? idTable[j - 1][i]: false;
-	    b = isSameColor(i - 1, j, color) ? idTable[j][i - 1]: false;
-	    regA = a ? regions[a]: undefined;
-	    regB = b ? regions[b]: undefined;
+	    idA = isSameColor(i, j - 1, color) ? idTable[j - 1][i]: false;
+	    idB = isSameColor(i - 1, j, color) ? idTable[j][i - 1]: false;
+	    regA = idA ? regions[idA]: undefined;
+	    regB = idB ? regions[idB]: undefined;
 
-	    if (a && b) {
-		if (a != b) {
+	    if (idA && idB) {
+		if (idA != idB) {
 		    if (regA.coords.length > regB.coords.length) {
-			delete regions[regB.id];
+			delete regions[idB];
 			regA.mergeRegion(regB, idTable);
 			regA.addCoord(coord, idTable);
 		    } else {
-			delete regions[regA.id];
+			delete regions[idA];
 			regB.mergeRegion(regA, idTable);
 			regB.addCoord(coord, idTable);
 		    }
 		} else {
 		    regA.addCoord(coord, idTable);
 		}
-	    } else if (a) {
+	    } else if (idA) {
 		regA.addCoord(coord, idTable);
-	    } else if (b) {
+	    } else if (idB) {
 		regB.addCoord(coord, idTable);
 	    } else {
 		var newRegion = new Region(ids, color);
@@ -157,9 +158,9 @@ CCV.prototype.calcCCV = function(regions, threshold) {
     for (var id in regions) {
 	var region = regions[id];
 	if (region.coords.length > threshold) {
-	    ccv[region.color * 2] += 1;
+	    ccv[region.color * 2]++;
 	} else {
-	    ccv[region.color * 2 + 1] += 1;
+	    ccv[region.color * 2 + 1]++;
 	}
     }
     return ccv;
