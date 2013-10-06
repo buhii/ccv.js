@@ -3,28 +3,59 @@
   <head>
     <meta charset="utf-8"/>
     <title>Color Coherence Vector Demo</title>
+    <script src="StackBlur.js"></script>
     <script src="ccv.js"></script>
     <script>
       function demo() {
+        /* image selector */
+        var images = [
+          'http://i.imgur.com/kq3PQYJ.jpg',
+          'http://i.imgur.com/xr7V1Vv.jpg',
+          'http://i.imgur.com/7AM5JEn.jpg'];
+        var imgsel = document.getElementById('image-selector');
+        for (var i=0; i < images.length; i++) {
+          var atag = document.createElement("a");
+          atag.setAttribute("href", "demo.html?img=" + i);
+          var imgtag = document.createElement("img");
+          imgtag.setAttribute("src", images[i]);
+          imgtag.setAttribute("width", "96px");
+          imgtag.setAttribute("height", "96px");
+          atag.appendChild(imgtag)
+          imgsel.appendChild(atag);
+        }
+
+        /* calculation */
+        var img_id = parseInt(window.location.search.substring(1).split("&")[0].split('img=')[1]) || 0;
         var image = document.getElementById('image');
-	image.crossOrigin = "anonymous";
-	image.src = 'http://i.imgur.com/7AM5JEn.jpg';
-	image.onload = function() {
-	  var ccv = new CCV({
-	    element: "image",
-	    threshold: 25,
-	    size: 240
-	  });
+        image.crossOrigin = "anonymous";
+        image.src = images[img_id];
+        image.onload = function() {
+          var ccv = new CCV({
+            element: "image",
+            threshold: 25,
+            size: 240
+          });
+          var vector = ccv.calc();
+          ccv.debugPreview();   // preview regions
 
-	  var vector = ccv.calc();
-	  var resultDisplay = document.getElementById('result');
-	  var result = 'ccv = [' + vector.join(', ') + ']';
-	  var node = document.createTextNode(result);
-	  resultDisplay.appendChild(node);
+          /* numpy-like display */
+          var resultDisplay = document.getElementById('result');
+          for (var i = 0; i < vector.length; i+=18) {
+            var prefix = i == 0 ? '[' : ' ';
+            var suffix = ((Math.floor(i / 18) + 1) * 18 > vector.length) ? ']': '';
+            var text = vector.slice(i, i+18).map(function (val) {
+              var s = val.toString(); var sl = s.length;
+              for (var j = 0; j < (4 - sl); j++) { s = ' ' + s; }
+              return s;
+            }).join('');
+            text = prefix + text + suffix;
 
-	  // preview regions
-	  ccv.debugPreview();
-	};
+            var node = document.createTextNode(text);
+            var br = document.createElement("br");
+            resultDisplay.appendChild(node);
+            resultDisplay.appendChild(br);
+          }
+        };
       }
     </script>
   </head>
@@ -32,15 +63,18 @@
     <h1>ccv.js demo</h1>
     <div id="description">
       <p>
-	Calculate color coherence vector for similar image search.<br />
-	Ported from <a href="https://bitbucket.org/aihara/pyccv">pyccv</a>
-	by <a href="http://argmax.jp">Shunsuke Aihara</a>.<br />
+        Calculate color coherence vector for similar image search.<br />
+        Ported from <a href="https://bitbucket.org/aihara/pyccv">pyccv</a>
+        by <a href="http://argmax.jp">Shunsuke Aihara</a>.<br />
+        Using <a href="http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html">StackBlur implementation</a>
+        by Mario Klingemann.<br />
       </p>
       <p>
-	Please see <a href="https://github.com/buhii/ccv.js">github</a> repository.
+        Please see <a href="https://github.com/buhii/ccv.js">github</a> repository.
       </p>
     </div>
-    <div><code id="result"></code></div>
+    <div id="image-selector"></div>
+    <div><pre><code id="result"></code></pre></div>
     <img style="margin-top: 1em;" id="image" />
   </body>
 </html>
