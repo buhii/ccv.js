@@ -9,8 +9,9 @@
       function demo() {
         /* image selector */
         var images = [
-          'http://i.imgur.com/kq3PQYJ.jpg',
-          'http://i.imgur.com/xr7V1Vv.jpg',
+          'http://i.imgur.com/uDB3LZH.png',
+          'http://i.imgur.com/4b8Ppeg.png',
+          'http://i.imgur.com/Al5Pyfe.png',
           'http://i.imgur.com/7AM5JEn.jpg'];
         var imgsel = document.getElementById('image-selector');
         for (var i=0; i < images.length; i++) {
@@ -26,6 +27,9 @@
 
         /* calculation */
         var img_id = parseInt(window.location.search.substring(1).split("&")[0].split('img=')[1]) || 0;
+        if ((images.length - 1) < img_id) {
+          img_id = 0;
+        }
         var image = document.getElementById('image');
         image.crossOrigin = "anonymous";
         image.src = images[img_id];
