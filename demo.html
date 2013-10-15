@@ -9,16 +9,18 @@
       function demo() {
         /* image selector */
         var images = [
-          'http://i.imgur.com/uDB3LZH.png',
-          'http://i.imgur.com/4b8Ppeg.png',
-          'http://i.imgur.com/Al5Pyfe.png',
-          'http://i.imgur.com/7AM5JEn.jpg'];
+          "7AM5JEn",
+          "dwrtxlP",
+          "lCoYP4z",
+          "w8dK7fg",
+          "rmjWVSN",
+          ];
         var imgsel = document.getElementById('image-selector');
         for (var i=0; i < images.length; i++) {
           var atag = document.createElement("a");
           atag.setAttribute("href", "demo.html?img=" + i);
           var imgtag = document.createElement("img");
-          imgtag.setAttribute("src", images[i]);
+          imgtag.setAttribute("src", "images/" + images[i] + "_t.jpg");
           imgtag.setAttribute("width", "96px");
           imgtag.setAttribute("height", "96px");
           atag.appendChild(imgtag)
@@ -32,7 +34,7 @@
         }
         var image = document.getElementById('image');
         image.crossOrigin = "anonymous";
-        image.src = images[img_id];
+        image.src = "http://i.imgur.com/" + images[img_id] + ".jpg";
         image.onload = function() {
           var ccv = new CCV({
             element: "image",
