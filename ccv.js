@@ -118,8 +118,8 @@ CCV.prototype = {
             for (j = 0; j < height; j++) {
                 coord = new CCV.Coordinate(i, j);
                 color = reducedImage[j][i];
-                idA = isSameColor(i, j - 1, color) ? idTable[j - 1][i]: false;
-                idB = isSameColor(i - 1, j, color) ? idTable[j][i - 1]: false;
+                idA = isSameColor(i, j - 1, color) ? idTable[j - 1][i]: undefined;
+                idB = isSameColor(i - 1, j, color) ? idTable[j][i - 1]: undefined;
                 regA = idA ? regions[idA]: undefined;
                 regB = idB ? regions[idB]: undefined;
 
